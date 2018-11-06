@@ -3,6 +3,25 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      list: list,
+    };
+
+    this.onDismiss = this.onDismiss.bind(this);
+  }
+
+  onDismiss(id) {
+    function isNotId(item) {
+      return item.objectID !== id;
+    }
+
+    const updatedList = this.state.list.filter(isNotId);
+    this.setState({list: updatedList});
+  }
+
   render() {
     const siteName = "HackerNews";
     const tagLine = "We'll stop writing it when you stop reading it!";
@@ -13,25 +32,6 @@ class App extends Component {
       lastName: 'Birungi',
     };
 
-    const list = [
-      {
-        title: 'React',
-        url: 'https://reactjs.org/',
-        author: 'Jordan Walke',
-        num_comments: 3,
-        points: 4,
-        objectID: 0,
-      },
-      {
-        title: 'Redux',
-        url: 'https://redux.js.org/',
-        author: 'Dan Abramov, Andrew Clark',
-        num_comments: 2,
-        points: 5,
-        objectID: 1,
-      },
-    ];
-
     return (
       <div className="App">
         <h1>{siteName}</h1>
@@ -40,7 +40,7 @@ class App extends Component {
         <h2>{user.firstName + ' ' + user.lastName}, {helloWorld}</h2>
         <br /><br />
 
-        {list.map(item =>
+        {this.state.list.map(item =>
             <div key={item.objectID}>
               <span>
               <a href={item.url}>{item.title}</a>
@@ -48,11 +48,38 @@ class App extends Component {
               <span>{' ' + item.author}</span>
               <span>{' ' + item.num_comments}</span>
               <span>{' ' + item.points}</span>
+              <span>
+                <button
+                  onClick = {() => this.onDismiss(item.objectID)}
+                  type = "Button"
+                >
+                  Dismiss
+                </button>
+              </span>
             </div>
         )}
       </div>
     );
   }
 }
+
+const list = [
+  {
+    title: 'React',
+    url: 'https://reactjs.org/',
+    author: 'Jordan Walke',
+    num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: 'Redux',
+    url: 'https://redux.js.org/',
+    author: 'Dan Abramov, Andrew Clark',
+    num_comments: 2,
+    points: 5,
+    objectID: 1,
+  },
+];
 
 export default App;
