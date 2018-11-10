@@ -8,9 +8,11 @@ class App extends Component {
 
     this.state = {
       list: list,
+      searchTerm: "",
     };
 
     this.onDismiss = this.onDismiss.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
   }
 
   onDismiss(id) {
@@ -20,6 +22,10 @@ class App extends Component {
 
     const updatedList = this.state.list.filter(isNotId);
     this.setState({list: updatedList});
+  }
+
+  onSearchChange(event) {
+    this.setState({searchTerm: event.target.value});
   }
 
   render() {
@@ -40,7 +46,12 @@ class App extends Component {
         <h2>{user.firstName + ' ' + user.lastName}, {helloWorld}</h2>
         <br /><br />
 
-        {this.state.list.map(item =>
+        <form>
+          <input type="text" onChange={this.onSearchChange}/>
+        </form>
+        <br /><br />
+
+        {this.state.list.filter(isSearched(this.state.searchTerm)).map(item =>
             <div key={item.objectID}>
               <span>
               <a href={item.url}>{item.title}</a>
@@ -81,5 +92,11 @@ const list = [
     objectID: 1,
   },
 ];
+
+function isSearched(searchTerm) {
+  return function(item) {
+    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  }
+}
 
 export default App;
