@@ -6,7 +6,7 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
+      this.state = {
       list: list,
       searchTerm: "",
     };
@@ -33,6 +33,8 @@ class App extends Component {
     const tagLine = "We'll stop writing it when you stop reading it!";
     const helloWorld = "Welcome To HackerNews!";
 
+    const {searchTerm, list} = this.state;
+
     let user = {
       firstName: 'Trust',
       lastName: 'Birungi',
@@ -46,24 +48,55 @@ class App extends Component {
         <h2>{user.firstName + ' ' + user.lastName}, {helloWorld}</h2>
         <br /><br />
 
-        <form>
-          <input type="text" onChange={this.onSearchChange}/>
-        </form>
+        <Search
+          value={searchTerm}
+          onChange={this.onSearchChange}
+        />
+
         <br /><br />
 
-        {this.state.list.filter(isSearched(this.state.searchTerm)).map(item =>
-            <div key={item.objectID}>
+        <Table
+          list={list}
+          pattern={searchTerm}
+          onDismiss={this.onDismiss}
+        />
+      </div>
+    );
+  }
+}
+
+class Search extends Component {
+  render() {
+    const {value, onChange} = this.props;
+    return(
+      <form>
+        <input
+          type="text"
+          value={value}
+          onChange={onChange}
+        />
+      </form>
+    );
+  }
+}
+
+class Table extends Component {
+  render() {
+    const {list, pattern, onDismiss} = this.props;
+    return(
+      <div>
+        {list.filter(isSearched(pattern)).map(item =>
+          <div key={item.objectID}>
               <span>
-              <a href={item.url}>{item.title}</a>
+                <a href={item.url}>{item.title}</a>
               </span>
               <span>{' ' + item.author}</span>
               <span>{' ' + item.num_comments}</span>
               <span>{' ' + item.points}</span>
               <span>
                 <button
-                  onClick = {() => this.onDismiss(item.objectID)}
+                  onClick = {() => onDismiss(item.objectID)}
                   type = "Button"
-                  value = {searchTerm}
                 >
                   Dismiss
                 </button>
