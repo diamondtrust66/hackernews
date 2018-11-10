@@ -63,6 +63,7 @@ class App extends Component {
                 <button
                   onClick = {() => this.onDismiss(item.objectID)}
                   type = "Button"
+                  value = {searchTerm}
                 >
                   Dismiss
                 </button>
