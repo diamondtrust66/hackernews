@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import './index.css';
 
 class App extends Component {
   constructor(props) {
@@ -41,27 +42,29 @@ class App extends Component {
     };
 
     return (
-      <div className="App">
+      <div className="page">
         <h1>{siteName}</h1>
         <h1>||</h1>
         <h2>{tagLine}</h2>
         <h2>{user.firstName + ' ' + user.lastName}, {helloWorld}</h2>
         <br /><br />
-
-        <Search
-          value={searchTerm}
-          onChange={this.onSearchChange}
-        >
-          Search
-        </Search>
+        <div className="interactions">
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+          >
+            Search
+          </Search>
+        </div>
 
         <br /><br />
-
-        <Table
-          list={list}
-          pattern={searchTerm}
-          onDismiss={this.onDismiss}
-        />
+        <div className="Table">
+          <Table
+            list={list}
+            pattern={searchTerm}
+            onDismiss={this.onDismiss}
+          />
+        </div>
       </div>
     );
   }
@@ -86,9 +89,9 @@ class Table extends Component {
   render() {
     const {list, pattern, onDismiss} = this.props;
     return(
-      <div>
+      <div className="table">
         {list.filter(isSearched(pattern)).map(item =>
-          <div key={item.objectID}>
+          <div key={item.objectID} className="table-row">
               <span>
                 <a href={item.url}>{item.title}</a>
               </span>
@@ -99,6 +102,7 @@ class Table extends Component {
                 <Button
                   onClick = {() => onDismiss(item.objectID)}
                   type = "Button"
+                  className=""
                 >
                   Dismiss
                 </Button>
