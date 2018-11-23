@@ -3,17 +3,23 @@ import logo from './logo.svg';
 import './App.css';
 import './index.css';
 
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+
 class App extends Component {
   constructor(props) {
     super(props);
 
       this.state = {
-      list: list,
-      searchTerm: "",
+      result: null,
+      searchTerm: DEFAULT_QUERY,
     };
 
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
   }
 
   onDismiss(id) {
@@ -29,12 +35,29 @@ class App extends Component {
     this.setState({searchTerm: event.target.value});
   }
 
+  setSearchTopStories(result) {
+    this.setState({result});
+  }
+
+  componentDidMount() {
+    const {searchTerm} = this.state;
+
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
+  }
+
   render() {
     const siteName = "HackerNews";
     const tagLine = "We'll stop writing it when you stop reading it!";
     const helloWorld = "Welcome To HackerNews!";
 
-    const {searchTerm, list} = this.state;
+    const {searchTerm, result} = this.state;
+
+    if(!result) {
+      return null;
+    }
 
     let user = {
       firstName: 'Trust',
@@ -48,23 +71,25 @@ class App extends Component {
         <h2>{tagLine}</h2>
         <h2>{user.firstName + ' ' + user.lastName}, {helloWorld}</h2>
         <br /><br />
-        <div className="interactions">
-          <Search
-            value={searchTerm}
-            onChange={this.onSearchChange}
-          >
-            Search
-          </Search>
-        </div>
+        <ErrorBoundary>
+          <div className="interactions">
+            <Search
+              value={searchTerm}
+              onChange={this.onSearchChange}
+            >
+              Search
+            </Search>
+          </div>
 
-        <br /><br />
-        <div className="Table">
-          <Table
-            list={list}
-            pattern={searchTerm}
-            onDismiss={this.onDismiss}
-          />
-        </div>
+          <br /><br />
+          <div className="Table">
+            <Table
+              list={result.hits}
+              pattern={searchTerm}
+              onDismiss={this.onDismiss}
+            />
+          </div>
+        </ErrorBoundary>
       </div>
     );
   }
@@ -156,6 +181,27 @@ const list = [
 function isSearched(searchTerm) {
   return function(item) {
     return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  }
+}
+
+//An error boundary to provide a fallback UI in case a component fails instead of crashing the entire app
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+    };
+  }
+
+  componentDidCatch(error, info) {
+    this.setState({hasError: true});
+  }
+
+  render(){
+    if(this.state.hasError) {
+      return <h1>Oops! Something went wrong. We are working relentlessly to fix it!</h1>
+    }
+    return this.props.children;
   }
 }
 
