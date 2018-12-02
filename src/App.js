@@ -16,6 +16,7 @@ class App extends Component {
       result: null,
       searchTerm: DEFAULT_QUERY,
       hits: [],
+      isLoading: false,
     };
 
     this.onDismiss = this.onDismiss.bind(this);
@@ -44,10 +45,12 @@ class App extends Component {
 
   componentDidMount() {
     const {searchTerm} = this.state;
+    this.setState({isLoading: true});
 
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
+      .then(result => this.setState({isLoading: false}))
       .catch(error => error);
   }
 
@@ -56,7 +59,11 @@ class App extends Component {
     const tagLine = "We'll stop writing it when you stop reading it!";
     const helloWorld = "Welcome To HackerNews!";
 
-    const {searchTerm, result} = this.state;
+    const {searchTerm, result, isLoading} = this.state;
+
+    if(isLoading) {
+      return <p>Loading...</p>;
+    }
 
     if(!result) {
       return null;
@@ -86,11 +93,14 @@ class App extends Component {
 
           <br /><br />
           <div className="Table">
-            <Table
+          { result
+            ? <Table
               list={result.hits}
               pattern={searchTerm}
               onDismiss={this.onDismiss}
             />
+            : null
+          }
           </div>
         </ErrorBoundary>
       </div>
@@ -161,25 +171,6 @@ class Button extends Component {
     );
   }
 }
-
-const list = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
 
 function isSearched(searchTerm) {
   return function(item) {
