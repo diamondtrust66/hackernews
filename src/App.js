@@ -15,6 +15,7 @@ class App extends Component {
       this.state = {
       result: null,
       searchTerm: DEFAULT_QUERY,
+      hits: [],
     };
 
     this.onDismiss = this.onDismiss.bind(this);
@@ -27,8 +28,10 @@ class App extends Component {
       return item.objectID !== id;
     }
 
-    const updatedList = this.state.list.filter(isNotId);
-    this.setState({list: updatedList});
+    const updatedList = this.state.result.hits.filter(isNotId);
+    this.setState({
+      result: Object.assign({}, this.state.result, {hits: updatedList})
+    });
   }
 
   onSearchChange(event) {
