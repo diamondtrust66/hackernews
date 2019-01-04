@@ -40,17 +40,18 @@ class App extends Component {
   onSearchChange(event) {
     console.log("OnSearchChange() was called.");
     this.setState({searchTerm: event.target.value});
-    this.onSearchSubmit(event.target.value);
+    //this.onSearchSubmit(event.target.value);
   }
 
   setSearchTopStories(result) {
     this.setState({result});
   }
 
-  onSearchSubmit() {
+  onSearchSubmit(event) {
     console.log("Search Term was submitted.");
     const {searchTerm} = this.state;
     this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
   }
 
   fetchSearchTopStories(searchTerm) {
@@ -108,13 +109,11 @@ class App extends Component {
 
           <br /><br />
           <div className="Table">
-          { result
-            ? <Table
+          { result &&
+             <Table
               list={result.hits}
-              pattern={searchTerm}
               onDismiss={this.onDismiss}
             />
-            : null
           }
           </div>
           </ErrorBoundary>
@@ -125,14 +124,17 @@ class App extends Component {
 
 class Search extends Component {
   render() {
-    const {value, onChange, children} = this.props;
+    const {value, onChange, onSubmit, children} = this.props;
     return(
-      <form>
-        {children} <input
+      <form onSubmit={onSubmit}>
+        <input
           type="text"
           value={value}
           onChange={onChange}
         />
+        <button type="submit">
+          {children}
+        </button>
       </form>
     );
   }
@@ -140,10 +142,10 @@ class Search extends Component {
 
 class Table extends Component {
   render() {
-    const {list, pattern, onDismiss} = this.props;
+    const {list, onDismiss} = this.props;
     return(
       <div className="table">
-        {list.filter(isSearched(pattern)).map(item =>
+        {list.map(item =>
           <div key={item.objectID} className="table-row">
               <span>
                 <a href={item.url}>{item.title}</a>
@@ -184,14 +186,6 @@ class Button extends Component {
         {children}
       </button>
     );
-  }
-}
-
-function isSearched(searchTerm) {
-  return function(item) {
-    if(item) {
-      return item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    }
   }
 }
 
