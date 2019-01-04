@@ -22,6 +22,8 @@ class App extends Component {
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
   }
 
   onDismiss(id) {
@@ -36,22 +38,34 @@ class App extends Component {
   }
 
   onSearchChange(event) {
+    console.log("OnSearchChange() was called.");
     this.setState({searchTerm: event.target.value});
+    this.onSearchSubmit(event.target.value);
   }
 
   setSearchTopStories(result) {
     this.setState({result});
   }
 
-  componentDidMount() {
+  onSearchSubmit() {
+    console.log("Search Term was submitted.");
     const {searchTerm} = this.state;
-    this.setState({isLoading: true});
+    this.fetchSearchTopStories(searchTerm);
+  }
 
+  fetchSearchTopStories(searchTerm) {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .then(result => this.setState({isLoading: false}))
       .catch(error => error);
+  }
+
+  componentDidMount() {
+    const {searchTerm} = this.state;
+    this.setState({isLoading: true});
+
+    this.fetchSearchTopStories(searchTerm);
   }
 
   render() {
@@ -86,6 +100,7 @@ class App extends Component {
             <Search
               value={searchTerm}
               onChange={this.onSearchChange}
+              onSubmit = {this.onSearchSubmit}
             >
               Search
             </Search>
@@ -102,7 +117,7 @@ class App extends Component {
             : null
           }
           </div>
-        </ErrorBoundary>
+          </ErrorBoundary>
       </div>
     );
   }
@@ -174,7 +189,9 @@ class Button extends Component {
 
 function isSearched(searchTerm) {
   return function(item) {
-    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    if(item) {
+      return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    }
   }
 }
 
