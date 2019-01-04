@@ -40,7 +40,7 @@ class App extends Component {
   onSearchChange(event) {
     console.log("OnSearchChange() was called.");
     this.setState({searchTerm: event.target.value});
-    //this.onSearchSubmit(event.target.value);
+    this.onSearchSubmit(event.target.value);
   }
 
   setSearchTopStories(result) {
@@ -51,7 +51,7 @@ class App extends Component {
     console.log("Search Term was submitted.");
     const {searchTerm} = this.state;
     this.fetchSearchTopStories(searchTerm);
-    event.preventDefault();
+    //event.preventDefault();
   }
 
   fetchSearchTopStories(searchTerm) {
