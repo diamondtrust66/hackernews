@@ -16,41 +16,58 @@ class App extends Component {
     super(props);
 
       this.state = {
-      result: null,
-      searchTerm: DEFAULT_QUERY,
-      hits: [],
-      isLoading: false,
-    };
+        results: null,
+        searchKey: '',
+        searchTerm: DEFAULT_QUERY,
+        hits: [],
+        isLoading: false,
+        error: null,
+      };
 
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
+    this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
   }
 
   onDismiss(id) {
+    const {searchKey, results} = this.state;
+    const {hits, page} = results[searchKey];
+
     function isNotId(item) {
       return item.objectID !== id;
     }
 
-    const updatedList = this.state.result.hits.filter(isNotId);
+    //const updatedList = this.state.result.hits.filter(isNotId);
+    const updatedHits = hits.filter(isNotId);
     this.setState({
-      result: Object.assign({}, this.state.result, {hits: updatedList})
+      results: {
+        ...results,
+        [searchKey]: {hits: updatedHits, page}
+      }
     });
   }
 
   onSearchChange(event) {
     console.log("OnSearchChange() was called.");
     this.setState({searchTerm: event.target.value});
-    this.onSearchSubmit(event.target.value);
+    //this.onSearchSubmit(event.target.value); //this line can enable returning of search results as the user types their search query
   }
 
   setSearchTopStories(result) {
     const {hits, page} = result;
+    const {searchKey, results} = this.state;
 
+    /*
     const oldHits = page !== 0
       ? this.state.result.hits
+      : [];
+    */
+
+    const oldHits = results && results[searchKey]
+      ? results[searchKey].hits
       : [];
 
     const updatedHits = [
@@ -59,15 +76,23 @@ class App extends Component {
     ];
 
     this.setState({
-      result: {hits:updatedHits, page}
+      results: {
+        ...results,
+        [searchKey]: {hits: updatedHits, page}
+      }
     });
   }
 
   onSearchSubmit(event) {
     console.log("Search Term was submitted.");
     const {searchTerm} = this.state;
-    this.fetchSearchTopStories(searchTerm);
-    //event.preventDefault();
+    this.setState({searchKey: searchTerm});
+
+    if (this.needsToSearchTopStories) {
+      this.fetchSearchTopStories(searchTerm);
+    }
+
+    event.preventDefault();
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
@@ -75,12 +100,16 @@ class App extends Component {
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .then(result => this.setState({isLoading: false}))
-      .catch(error => error);
+      .catch(error => this.setState({error}));
+  }
+
+  needsToSearchTopStories(searchTerm) {
+    return !this.state.results[searchTerm];
   }
 
   componentDidMount() {
     const {searchTerm} = this.state;
-    this.setState({isLoading: true});
+    this.setState({isLoading: true, searchKey: searchTerm});
 
     this.fetchSearchTopStories(searchTerm);
   }
@@ -90,14 +119,16 @@ class App extends Component {
     const tagLine = "We'll stop writing it when you stop reading it!";
     const helloWorld = "Welcome To HackerNews!";
 
-    const {searchTerm, result, isLoading} = this.state;
-    const page = (result && result.page) || 0;
+    const {searchTerm, results, searchKey, isLoading, error} = this.state;
+    const page = (results && results[searchKey] && results[searchKey].page) || 0;
+
+    const list = (results && results[searchKey] && results[searchKey].hits) || [];
 
     if(isLoading) {
       return <p>Loading...</p>;
     }
 
-    if(!result) {
+    if(!results) {
       return null;
     }
 
@@ -124,20 +155,23 @@ class App extends Component {
             </Search>
           </div>
           <div className="more">
-            <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+            <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
               More
             </Button>
           </div>
 
           <br /><br />
-          <div className="Table">
-          { result &&
-             <Table
-              list={result.hits}
-              onDismiss={this.onDismiss}
-            />
+          {error
+            ? <div className="interactions">
+                <p>Oops! Something went wrong. We are working relentlessly to fix it!</p>
+            </div>
+            : <div className="Table">
+                <Table
+                  list={list}
+                  onDismiss={this.onDismiss}
+                />
+              </div>
           }
-          </div>
           </ErrorBoundary>
       </div>
     );
