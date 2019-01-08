@@ -3,6 +3,7 @@ import axios from 'axios';
 import logo from './logo.svg';
 import './App.css';
 import './index.css';
+import * as user from './helpers.js';
 
 const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
@@ -94,6 +95,7 @@ class App extends Component {
     if (this.needsToSearchTopStories) {
       this.fetchSearchTopStories(searchTerm);
     }
+    console.log(user.firstName + " " + user.lastName);
 
     event.preventDefault();
   }
@@ -275,3 +277,9 @@ class ErrorBoundary extends React.Component {
 }
 
 export default App;
+
+export {
+  Button,
+  Table,
+  Search,
+};
